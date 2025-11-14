@@ -1,18 +1,66 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "@/contexts/ThemeContext";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Sun, Moon, Monitor } from "lucide-react";
+import type { UserSettings } from "@shared/schema";
 
 export default function Settings() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const { theme, setTheme } = useTheme();
+
+  const { data: settings } = useQuery<UserSettings>({
+    queryKey: ["/api/settings"],
+    enabled: isAuthenticated,
+  });
+
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [matchStartAlerts, setMatchStartAlerts] = useState(true);
+
+  useEffect(() => {
+    if (settings) {
+      setEmailNotifications(settings.emailNotifications);
+      setMatchStartAlerts(settings.matchStartAlerts);
+    }
+  }, [settings]);
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (data: Partial<UserSettings>) => {
+      return await apiRequest("PATCH", "/api/settings", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      toast({
+        title: "Settings updated",
+        description: "Your preferences have been saved",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update settings",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggleEmailNotifications = (checked: boolean) => {
+    setEmailNotifications(checked);
+    updateSettingsMutation.mutate({ emailNotifications: checked });
+  };
+
+  const handleToggleMatchAlerts = (checked: boolean) => {
+    setMatchStartAlerts(checked);
+    updateSettingsMutation.mutate({ matchStartAlerts: checked });
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -103,7 +151,12 @@ export default function Settings() {
                   Receive notifications via email
                 </p>
               </div>
-              <Switch id="email-notifications" data-testid="switch-email-notifications" />
+              <Switch
+                id="email-notifications"
+                checked={emailNotifications}
+                onCheckedChange={handleToggleEmailNotifications}
+                data-testid="switch-email-notifications"
+              />
             </div>
 
             <Separator />
@@ -115,7 +168,12 @@ export default function Settings() {
                   Get notified when favorite teams play
                 </p>
               </div>
-              <Switch id="match-start-alerts" data-testid="switch-match-alerts" />
+              <Switch
+                id="match-start-alerts"
+                checked={matchStartAlerts}
+                onCheckedChange={handleToggleMatchAlerts}
+                data-testid="switch-match-alerts"
+              />
             </div>
 
             <Separator />

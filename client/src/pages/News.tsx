@@ -10,10 +10,8 @@ import type { NewsArticle } from "@shared/schema";
 
 export default function News() {
   const { data: articles, isLoading } = useQuery<NewsArticle[]>({
-    queryKey: ["/api/news"],
+    queryKey: ["/api/news?published=true"],
   });
-
-  const publishedArticles = articles?.filter((a) => a.published) || [];
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-8">
@@ -39,7 +37,7 @@ export default function News() {
               </Card>
             ))}
           </div>
-        ) : publishedArticles.length === 0 ? (
+        ) : !articles || articles.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <h3 className="text-xl font-semibold mb-2">No News Yet</h3>
@@ -50,7 +48,7 @@ export default function News() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {publishedArticles.map((article) => (
+            {articles?.map((article) => (
               <Card key={article.id} className="hover-elevate" data-testid={`article-card-${article.id}`}>
                 <CardContent className="p-6">
                   {article.heroImageUrl && (

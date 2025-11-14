@@ -14,18 +14,10 @@ export default function Leaderboards() {
   const [metric, setMetric] = useState("rating");
 
   const { data: players, isLoading } = useQuery<Player[]>({
-    queryKey: ["/api/players"],
+    queryKey: ["/api/leaderboards"],
   });
 
-  const sortedPlayers = [...(players || [])].sort((a, b) => {
-    if (metric === "rating") return b.averageRating - a.averageRating;
-    if (metric === "kd") {
-      const kdA = a.totalDeaths > 0 ? a.totalKills / a.totalDeaths : a.totalKills;
-      const kdB = b.totalDeaths > 0 ? b.totalKills / b.totalDeaths : b.totalKills;
-      return kdB - kdA;
-    }
-    return 0;
-  });
+  const sortedPlayers = [...(players || [])];
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">

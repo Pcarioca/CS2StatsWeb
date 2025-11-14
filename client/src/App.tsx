@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import NotFound from "@/pages/not-found";
@@ -22,6 +23,7 @@ import Admin from "@/pages/Admin";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  useWebSocket();
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -1,25 +1,29 @@
+import { useState } from "react";
 import { useParams, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, ArrowLeft, Star, Share2, MessageSquare } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Trophy, ArrowLeft, Star, Share2, MessageSquare, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import type { Match, MatchEvent, MatchPlayerStats, Team } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { Match, MatchEvent, MatchPlayerStats, Team, Comment, MatchWithTeams } from "@shared/schema";
 
 export default function MatchDetail() {
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const [commentContent, setCommentContent] = useState("");
 
-  const { data: match, isLoading } = useQuery<Match>({
+  const { data: match, isLoading } = useQuery<MatchWithTeams>({
     queryKey: ["/api/matches", id],
     enabled: !!id,
-  });
-
-  const { data: teams } = useQuery<Team[]>({
-    queryKey: ["/api/teams"],
   });
 
   const { data: events } = useQuery<MatchEvent[]>({
@@ -32,7 +36,45 @@ export default function MatchDetail() {
     enabled: !!id,
   });
 
-  const getTeam = (teamId: string) => teams?.find((t) => t.id === teamId);
+  const { data: comments } = useQuery<Comment[]>({
+    queryKey: ["/api/comments?matchId=" + id],
+    enabled: !!id,
+  });
+
+  const postCommentMutation = useMutation({
+    mutationFn: async (content: string) => {
+      return await apiRequest("POST", "/api/comments", { matchId: id, content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/comments?matchId=" + id] });
+      setCommentContent("");
+      toast({
+        title: "Comment posted",
+        description: "Your comment has been posted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to post comment",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePostComment = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to post comments",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!commentContent.trim()) return;
+    postCommentMutation.mutate(commentContent);
+  };
 
   if (isLoading) {
     return (
@@ -108,12 +150,12 @@ export default function MatchDetail() {
             <div className="text-center">
               <div className="mb-4">
                 <Avatar className="h-20 w-20 mx-auto mb-2">
-                  <AvatarImage src={getTeam(match.team1Id)?.logoUrl || undefined} alt={getTeam(match.team1Id)?.name || "Team 1"} />
+                  <AvatarImage src={match.team1?.logoUrl || undefined} alt={match.team1?.name || "Team 1"} />
                   <AvatarFallback className="text-2xl">
-                    {getTeam(match.team1Id)?.acronym || "T1"}
+                    {match.team1?.acronym || "T1"}
                   </AvatarFallback>
                 </Avatar>
-                <h2 className="text-2xl font-bold" data-testid="match-team1-name">{getTeam(match.team1Id)?.name || "Team 1"}</h2>
+                <h2 className="text-2xl font-bold" data-testid="match-team1-name">{match.team1?.name || "Team 1"}</h2>
               </div>
               {!isUpcoming && (
                 <div className="text-6xl font-mono font-bold" data-testid="match-team1-score">
@@ -136,12 +178,12 @@ export default function MatchDetail() {
             <div className="text-center">
               <div className="mb-4">
                 <Avatar className="h-20 w-20 mx-auto mb-2">
-                  <AvatarImage src={getTeam(match.team2Id)?.logoUrl || undefined} alt={getTeam(match.team2Id)?.name || "Team 2"} />
+                  <AvatarImage src={match.team2?.logoUrl || undefined} alt={match.team2?.name || "Team 2"} />
                   <AvatarFallback className="text-2xl">
-                    {getTeam(match.team2Id)?.acronym || "T2"}
+                    {match.team2?.acronym || "T2"}
                   </AvatarFallback>
                 </Avatar>
-                <h2 className="text-2xl font-bold" data-testid="match-team2-name">{getTeam(match.team2Id)?.name || "Team 2"}</h2>
+                <h2 className="text-2xl font-bold" data-testid="match-team2-name">{match.team2?.name || "Team 2"}</h2>
               </div>
               {!isUpcoming && (
                 <div className="text-6xl font-mono font-bold" data-testid="match-team2-score">
@@ -272,10 +314,62 @@ export default function MatchDetail() {
               <CardTitle>Match Discussion</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4" />
-                <p>Comments will be available soon</p>
-              </div>
+              {!isAuthenticated ? (
+                <div className="mb-6 p-4 rounded-lg bg-muted/30 text-center">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Log in to join the discussion and share your thoughts about this match
+                  </p>
+                  <Button variant="outline" asChild data-testid="button-login-prompt">
+                    <Link href="/">
+                      Log In to Comment
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="mb-6 space-y-3">
+                  <Textarea
+                    placeholder="Share your thoughts about this match..."
+                    value={commentContent}
+                    onChange={(e) => setCommentContent(e.target.value)}
+                    rows={3}
+                    data-testid="input-comment"
+                  />
+                  <Button
+                    onClick={handlePostComment}
+                    disabled={!commentContent.trim() || postCommentMutation.isPending}
+                    data-testid="button-post-comment"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {postCommentMutation.isPending ? "Posting..." : "Post Comment"}
+                  </Button>
+                </div>
+              )}
+
+              {comments && comments.length > 0 ? (
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="p-4 rounded-md bg-muted/30" data-testid={`comment-${comment.id}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>U</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="font-medium text-sm">User {comment.userId.slice(0, 8)}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(comment.createdAt!), { addSuffix: true })}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4" />
+                  <p>No comments yet{!isAuthenticated && ". Log in to start the discussion!"}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
