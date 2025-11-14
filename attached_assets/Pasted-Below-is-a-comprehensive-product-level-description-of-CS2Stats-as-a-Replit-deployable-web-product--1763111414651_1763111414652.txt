@@ -1,0 +1,354 @@
+Below is a comprehensive, product-level description of CS2Stats as a Replit-deployable web product — covering everything that must be implemented from features and user flows to UI appearance, behavior, accessibility, content, and edge cases. This is a specification for what the product should do and how it should look and behave; it intentionally avoids any details about how to build it.
+
+1) Product summary
+- Name: CS2Stats
+- Tagline: Real-time Counter‑Strike 2 match tracker and community
+- Elevator: A polished web platform where people follow live CS2 matches, inspect team and player stats, favorite teams and players, discuss games in realtime, and receive timely notifications. The experience is fast, data-rich, social, and community-moderated.
+
+2) Target users & roles
+- Visitor: Browses matches, teams, player pages, news; reads comments; views schedules and streams.
+- Registered User: All Visitor capabilities plus favoriting, commenting, uploading images, personal dashboard, notification preferences.
+- Admin: Manages teams, players, matches, content moderation, and site configuration.
+
+3) High-level UX principles
+- Real-time focus: Live match pages update smoothly with minimal visual disruption (deltas, not full reloads).
+- Clear hierarchy: At-a-glance status for live/upcoming/finished matches; deep dive available for every match, team, and player.
+- Community centric: Comments, threaded replies, reactions, and moderation indicators are first-class elements.
+- Lightweight & responsive: Desktop and mobile experiences are consistent, with tailored layouts for each.
+- Accessible & inclusive: Keyboard navigation, screen reader text, color contrast, and localized content.
+- Trust & transparency: Clear provenance for match data and moderation actions.
+
+4) Global layout & navigation
+- Header (persistent):
+  - Left: Logo clickable to Home.
+  - Middle: Primary nav: Matches, Teams, Players, News, Leaderboards, Community.
+  - Right: Search field (global), notification bell with unread count, user avatar / Sign in.
+- Footer:
+  - Secondary links: About, Privacy, Terms, Contact, API & data sources, Social links, Language selector.
+  - Small site credits and version/date of last data sync.
+- Responsive behavior:
+  - Desktop: full horizontal header, left-aligned primary nav, content in center column, right column optional (contextual).
+  - Tablet: condensed header, search icon expands inline; two-column content where appropriate.
+  - Mobile: hamburger menu, bottom tab bar optionally for Matches, Explore, Notifications, Profile.
+
+5) Home / Dashboard
+- Purpose: Landing and personalized entry point.
+- Sections in order:
+  - Hero: Current live match (if any) highlighted with scoreboard, short summary, and a “Watch” / “Open live page” CTA.
+  - Quick filters: Tabs or pills to switch between Live / Upcoming / Finished.
+  - Live matches carousel/grid: Cards with teams, score, map, time left or start time, favorite indicator (star).
+  - Upcoming matches list: compact rows with date/time, tournament, teams, and small action to add reminder/favorite.
+  - Personalized section (for logged-in users): Favorites feed showing upcoming/following matches, recent news related to favorites, and recommended teams/players.
+  - News & Community highlights: Latest posts, trending comments, and featured threads.
+  - Leaderboards & stats preview: Top players by recent metrics, trending players.
+- Empty states:
+  - No live matches: friendly message (“No matches live right now — check upcoming schedule or favorites.”) with CTA to follow a team.
+
+6) Global search & discovery
+- Behavior:
+  - Instant results as you type (team/player/match/news suggestions).
+  - Keyboard shortcut to focus search.
+  - Results grouped: Matches, Teams, Players, News.
+  - Each result shows small badges: country, status (live/upcoming), favorite indicator.
+- Deep results page:
+  - Full search engine with filters: status, date range, tournament, region, map, player role.
+  - Sort options (relevance, date, most commented).
+
+7) Matches listing & filters
+- List and calendar views:
+  - Default: chronological list grouped by day or tournament.
+  - Optional calendar or “by tournament” grouping.
+- Filters:
+  - Status (live/upcoming/finished), region, tournament, favorites-only toggle, team name, map.
+- Card design:
+  - Left: team logos and names, region flag, head-to-head.
+  - Center: status badge (LIVE in red with pulse for active), scheduled time or score, map icon(s).
+  - Right: quick actions: favorite/unfavorite, set reminder, open stream links.
+- Hover/expand:
+  - On desktop hover, show match preview with probable starting lineup, current map, and small timeline of last events.
+
+8) Match detail (core real-time page)
+- Top bar:
+  - Tournament, stage, match time/status, stream/watch links, share button, favorite toggle, report/more menu (for logged users).
+- Scoreboard area:
+  - Large team blocks with logos, names, series score (maps), and primary map being played.
+  - Active map panel: map name, score by half, round timer, side/round indicator, round winner streaks.
+- Live timeline / event feed:
+  - Vertical, reverse-chronological list of events (kills, clutches, bomb planted/defused, round end, player injuries, roster changes).
+  - Each event shows: timestamp (relative and absolute on hover), short human-friendly description, player avatars linked to profile, and small icons (weapon, bomb, round).
+  - Events are color-coded by event type and lightly animated on arrival (fade/slide).
+- Player stat grid:
+  - Tabbed view per team or combined: per-player metrics (kills, deaths, assists, ADR, K/D, rating, utility usage, opening kills).
+  - Click a player row to open a player card/popover with full match performance and action buttons (follow, compare).
+- Map & round visualizer:
+  - Schematic map strip showing positions of recent notable events (optional simplified heat/moments timeline).
+  - Round-by-round mini-visual: sequence of rounds with winner flags and key events tooltips.
+- Commentary & community:
+  - Right column or section: live comment feed (community chat for the match) and official match notes.
+  - Option to switch between moderated threaded comments and live chat (ephemeral).
+- Media & streams:
+  - Stream links with platform badges, latency hint, and multi-stream selector.
+  - Highlight clips (if available), thumbnails with short descriptions.
+- Interaction affordances:
+  - Real-time badges: when live, small “LIVE” pill with pulsate.
+  - Sound/visual notification controls for personal favorites.
+  - Rewind/seek: ability to view past match events with timeline scrubbing (client-side behavior).
+- Empty & finished states:
+  - If match finished: show full match recap, MVP, key stat highlights, and link to deeper match history.
+  - If scheduled: countdown timer with ability to add reminder or calendar invite.
+
+9) Team pages
+- Header:
+  - Team banner, logo, name, country flag, rank/acronym, social links, follow button.
+- Roster:
+  - Current starting 5 with avatars, nicknames, roles, and basic stats. Click opens player page.
+  - Past rosters and roster change log with timestamps.
+- Match history:
+  - Chronological list of recent matches with results, scorelines, and quick links to match detail.
+- Team stats & analytics:
+  - Seasonal aggregate stats: win rate, average rounds won, map preferences, recent form chart (sparkline).
+  - Per-player contribution metrics and interactive comparisons.
+- Media & news:
+  - Team-specific news, uploaded images, featured interviews.
+- CTA:
+  - Follow team, set alerts for matches, and suggest corrections (crowdsourced data flag).
+
+10) Player pages
+- Header:
+  - Player avatar, alias, real name, country, primary team, steam ID or official handle indicator, follow button.
+- Profile stats:
+  - Career summary: total matches, K/D, ADR, average rating, notable achievements.
+  - Recent form: last 10 matches with small stat list and per-match link.
+  - Per-map performance breakdown and role indicators.
+- Comparison tool:
+  - UI to pick two players and compare across selected metrics side-by-side.
+- Media:
+  - Personal action shots, highlight clips, and uploaded profile photos.
+- Social & links:
+  - Official social links, streams, and verified badges for authenticated players or organizations.
+
+11) Leaderboards & stats exploration
+- Leaderboard landing:
+  - Tabs for filters: daily, weekly, monthly, seasonal, all-time.
+  - Metric selector: rating, kills, ADR, headshot %, K/D, clutch success.
+  - Pagination and custom queries (map, tournament, region).
+- Player cards:
+  - Compact display with metric, trend arrow (improving/declining), and link to player page.
+
+12) News & editorial
+- Feed:
+  - List of articles, match previews, recaps, and community posts with images, author, time, and comment count.
+- Article page:
+  - Rich content layout, inline stats references, embedded match snapshots, author bio, and comment thread.
+- Post composer:
+  - For authorized authors and admins: rich text editor UI (headline, subtitle, hero image, tags), preview mode.
+- Social sharing:
+  - Share buttons, OpenGraph previews for each article.
+
+13) Community & comments
+- Comments UI:
+  - Threaded comments under matches and news, with inline avatars, badges (admin/moderator), timestamps, and reaction buttons (like, dislike, upvote).
+  - Paginated or lazy-loaded; newest first by default for live pages, oldest-first for articles.
+  - Editing and deletion: comment authors can edit for a limited time; moderators can remove or flag comments with visible reason.
+  - Abuse reporting: users can report a comment with one-click flows and category selection (spam, hate, etc.).
+  - Moderation indicators: “Removed by moderator”, “Flagged — under review”.
+- Live chat (optional mode on match pages):
+  - No threads, real-time rapid messages, ephemeral history, clear rules and rate limits visible.
+- Reactions & reputation:
+  - Users earn small reputation/badges via engagement; visible next to username.
+- Comment composer:
+  - Text input with markdown-like formatting toolbar, emoji picker, image attach/upload button with preview and size limits.
+  - Character limit and inline feedback (profanity warning, blocked words).
+- Accessibility:
+  - All comment actions accessible via keyboard; ARIA labels for replies, edit, and report buttons.
+
+14) Notifications & reminders
+- Notification center UI:
+  - Bell icon opens a panel listing recent notifications with filters (all, unread, mentions, favorite-team).
+  - Each item: relevant icon, summary text, timestamp, and quick action (open match, unsubscribe).
+- Types of notifications:
+  - Favorite team match started, favorite player in match, personal mentions/replies, followed thread updates, admin announcements.
+- Reminders:
+  - For upcoming matches: one-click “remind me” to receive in-app notification and email (user-configurable).
+- Preferences panel:
+  - Granular toggles: match-start emails, live push, newsletter, digest frequency.
+  - Per-team overrides and do-not-disturb scheduling.
+
+15) Uploads & media
+- Image upload UI:
+  - Drag-and-drop area and file picker with live preview and basic crop/resize controls.
+  - Acceptable formats indicated, file size limits, and thumbnail previews.
+  - Moderation notice and ownership/usage terms.
+- Media gallery:
+  - Team/player-specific galleries and global community uploads with filters (most liked, recent, featured).
+- Thumbnails & responsive images:
+  - All images delivered in appropriate sizes for context (avatar vs hero banner).
+
+16) Profile & settings
+- Profile page:
+  - Avatar, display name, biography, location, social links, favorites list (teams & players), recent activity.
+- Settings sections:
+  - Account (email, connected accounts like Google, change password), Notification preferences, Privacy controls (who can message mention you), Appearance (theme), Language, Delete/export data.
+- Appearance:
+  - Theme selector (light, dark, system) with high-contrast toggle.
+- Security & session:
+  - Active sessions list with ability to sign out other sessions, and recent account activity log.
+
+17) Admin & moderation UI (what it should do and look like)
+- Admin dashboard:
+  - High-level metrics: live matches count, ingestion health, flagged comments, pending uploads, recent admin actions.
+  - Quick actions: publish/unpublish tournaments, create match, moderate user.
+- Content moderation panels:
+  - Queue of flagged comments and images with context, original user, reason for flag, and action buttons (dismiss, remove, warn user, ban user).
+  - Bulk moderation ability and audit trail showing moderator, action, and timestamp.
+- Match management:
+  - Admin-only pages that show current match data with editable fields: teams, scheduled time, stream links, officiating notes.
+  - Historical logs of manual changes with reason fields; visible in match history.
+- User management:
+  - User list with search, role assignment, ban/suspend controls, and soft-delete option.
+- Media moderation:
+  - Review images with accept/reject toggles, automated moderation indicators (if present), and appeals workflow.
+
+18) Onboarding & first-run experience
+- For visitors:
+  - Light onboarding modal highlighting core features and how to follow a team or set reminders.
+- For new registered users:
+  - Interest picker: choose favorite teams and players to populate personalized feed.
+  - Tour overlay for first live-match view showing scoreboard, timeline, and comment area.
+- Progressive disclosures:
+  - Tooltips on complex features (comparison tool, stats filters) with short, skippable help.
+
+19) Visual design & brand language
+- Tone:
+  - Energetic, modern, and competitive. Uses bold typography for scores and subdued body text for metadata.
+- Color palette:
+  - Primary: high-contrast accent for LIVE and interactive CTAs (e.g., vivid red or orange).
+  - Secondary: dark neutrals for backgrounds and card shadows; accent blues or greens for success/info.
+- Typography:
+  - Large numeric fonts for scores; readable sans-serif for UI copy; monospace used sparingly (e.g., for IDs).
+- Iconography:
+  - Clean, lightweight icons for weapons, bomb, chat, etc. Use consistent stroke width and accessible size.
+- Imagery:
+  - Team logos, action shots for hero banners, and small avatars for players; keep imagery consistent and cropped.
+- Animation & motion:
+  - Subtle micro-interactions: button hover, live-event arrival (slide/fade), scoreboard changes with small emphasis animation.
+  - Avoid excessive motion; provide reduce-motion user preference.
+
+20) Responsive & adaptive layout specifics
+- Desktop:
+  - Three-column layout on match pages: main match content center, supplemental stats left, community right.
+  - Hover interactions and richer tooltips.
+- Tablet:
+  - Two-column layout; collapsible side panels.
+- Mobile:
+  - Single-column stack with sticky header and bottom context actions (favorite, reminders, open chat).
+  - Compact scoreboard: team logos side-by-side, with an expandable section for full stats.
+- Touch targets:
+  - Minimum recommended touch target size for interactive elements.
+
+21) Accessibility & localization
+- Accessibility requirements:
+  - Full keyboard navigation, focus outlines, and skip links.
+  - ARIA roles and labels for dynamic content (live region announcements when new events arrive).
+  - Color contrast must meet WCAG AA (preferably AAA for primary CTAs).
+  - Provide captions and text alternatives for media clips; transcripts for long content.
+  - Provide option to reduce or disable animations.
+- Internationalization:
+  - Date/time displayed in user-local timezone with toggle to view in tournament timezone.
+  - Language selector that translates UI and content where available.
+  - Right-to-left support for languages that require it.
+
+22) Real-time UX behaviors (what the user sees)
+- Event arrival:
+  - New event appears in timeline with brief highlight; existing visible content does not jump. An unobtrusive “2 new events” indicator appears when scrolled away from live feed, with a single tap to jump to newest events.
+- Reconnect & snapshot:
+  - If connection is lost, show non-intrusive banner “Reconnecting…”, then resume feed and show missed event count/button to fetch history.
+- Rate limits visible:
+  - When user posts too frequently, show gentle UI explaining cooldown and when they can post again.
+- Graceful data corrections:
+  - If later authoritative data corrects an earlier event, show the correction with an annotation “Updated” and reason.
+
+23) Error states, edge cases & messaging
+- Generic error banner with clear human language and possible actions (retry, go to home).
+- Specific messages:
+  - Match data unavailable: “This match’s live data is currently unavailable. Try refreshing or check again later.”
+  - Image upload failed: clear reason (file too large / unsupported type / moderation pending).
+  - Permission denied: clear explanation with CTA to sign in or contact support.
+- Empty list guidance:
+  - If no results, suggest actions (clear filters, try search, follow teams).
+- Maintenance & outage UX:
+  - Friendly maintenance page with expected uptime and status link; admin announcements in the header when critical.
+
+24) Privacy, reporting & user controls (what to present)
+- Privacy page (user-visible summary) describing what data is used (favorites, email for notifications), and options to export/delete account data via settings.
+- Clear consent: when enabling email reminders, show what will be sent and allow quick opt-out.
+- Reporting flow visible and easy to use with acknowledgement of receipt and expected review timeline.
+- Public profiles: username and public activity visible; private data hidden.
+
+25) SEO & shareability (UI considerations)
+- Share buttons on matches, team pages, and articles with generated preview text and image.
+- Clear permalink UI for each match and event to share a specific moment.
+- Social previews: friendly images and concise descriptions for each type of page.
+
+26) Analytics & insights (visible to admins)
+- Admin-facing dashboards should present: traffic to live pages, most-followed teams/players, top-commented matches, email deliverability summaries, and moderation queue metrics.
+- Exportable CSV or report downloads for match stats and engagement metrics.
+
+27) Personalization & advanced features
+- Personalized newsfeed based on favorites and followed tags.
+- Alerts tuning: users can choose channels (in-app only, email, or both) and threshold rules (only major tournaments).
+- Comparison & watchlist:
+  - User-created watchlists for tournaments or match groups.
+  - Player/team comparison widgets with historical head-to-head.
+
+28) Mobile app parity expectations (if later added)
+- All core features available on mobile web; native app should prioritize live match UX, push notifications, and low-latency chat.
+
+29) Visual examples & microcopy notes
+- CTAs:
+  - Primary: “Follow”, “Set reminder”, “Open live”.
+  - Secondary: “View stats”, “Compare”, “Share”.
+- Microcopy:
+  - Use concise, plain language: “Match begins in 12m”, “You’re following Team X — get notified when they play.”
+  - Error tone: apologetic and helpful: “Sorry — we couldn’t load player stats. Try again in a bit.”
+- Badges & labels:
+  - “LIVE” (red), “FINISHED” (gray), “SCHEDULED” (muted), “UPCOMING” (accent).
+  - Moderator labels on usernames (e.g., “MOD”), verified badges for official orgs/players.
+
+30) Content moderation & community norms (what to present)
+- Visible rules page for community conduct; short reminder visible during comment composition.
+- Moderation transparency: when action is taken, show limited public audit line: “This comment was removed by moderator on [date]: reason.”
+- Appeals CTA for moderated users visible in profile/moderation messages.
+
+31) Data fidelity & provenance (what to show)
+- Source annotation on match pages: small text showing where match data originated (e.g., official feed, community-submitted with admin verification).
+- Timestamps for events in both relative and absolute formats, including timezone note.
+
+32) Deliverables checklist (what the final product should include)
+- Fully designed pages/screens described above for Desktop, Tablet, and Mobile.
+- All described user flows for Visitor, Registered User, and Admin including empty/error states, onboarding, and preferences.
+- Real-time UX language and behaviors (event arrival, reconnect handling, missed events).
+- Community feature set: comments, chat, moderation UI, image upload flows, reporting.
+- Notification and reminder UX, with preferences and per-team controls.
+- Search and discovery UI with filters, suggestions, and result grouping.
+- Profile, settings, and privacy controls UI.
+- Admin dashboards and moderation panels with clear actions and audit logs.
+- Visual design guidelines: color palette, typography, iconography, and motion guidelines.
+- Accessibility and localization requirements and content.
+- Sample microcopy for CTAs, errors, onboarding, and moderation messages.
+
+33) Example user journeys (concise)
+- Visitor → Live match: lands on Home, sees live match hero, clicks “Open live”, watches live events and reads comments.
+- New user onboarding: registers via Google/email, picks favorite teams on first-run, sees personalized dashboard with their teams upcoming matches and sets reminders.
+- Admin moderation: receives flagged comment alert, reviews context in moderation panel, removes comment and logs reason.
+- Fan notification: user favorites Team A; when Team A goes live, user sees in-app banner and receives scheduled email (per preference).
+
+34) Final notes
+- The product’s success hinges on clear, fast, and reliable real-time presentation combined with a friendly community space. The UI must prioritize readability of statistical information and provide friction-free ways to follow and engage with teams and matches. Every interactive element should be predictable, discoverable, and respectful of users’ attention (allowing them to customize notification and display preferences).
+
+If you’d like, I can now:
+- Produce a visual sitemap listing every page and its key components.
+- Create explicit screen-by-screen annotated descriptions (e.g., exact content and element placement per match page breakpoint).
+- Draft example copy and microcopy for onboarding, notifications, moderation messages, and tooltips.
+
+Which of those would you like next?
