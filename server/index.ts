@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupAuth } from "./replitAuth";
+import path from "path";
 
 const app = express();
 
@@ -42,14 +43,17 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await setupAuth(app);
-
   app.use(express.json({
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     }
   }));
   app.use(express.urlencoded({ extended: false }));
+
+  // Local uploads (dev / fallback). When using a cloud storage service, URLs will be absolute.
+  app.use("/uploads", express.static(path.resolve("uploads")));
+
+  await setupAuth(app);
 
   const server = await registerRoutes(app);
 
@@ -75,11 +79,12 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+
+  const host = process.env.HOST ?? "0.0.0.0";
+  const listenOptions =
+    process.platform === "win32" ? { port, host } : { port, host, reusePort: true };
+
+  server.listen(listenOptions, () => {
+    log(`serving on http://localhost:${port}`);
   });
 })();

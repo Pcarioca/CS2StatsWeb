@@ -110,7 +110,7 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full" data-testid="button-user-menu">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                    <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
                     <AvatarFallback>
                       {user?.firstName?.[0]}{user?.lastName?.[0]}
                     </AvatarFallback>
@@ -150,7 +150,7 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Button asChild data-testid="button-signin">
-              <a href="/api/login">Sign in</a>
+              <Link href="/login">Sign in</Link>
             </Button>
           )}
 

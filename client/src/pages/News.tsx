@@ -80,7 +80,9 @@ export default function News() {
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
                         <span>
-                          {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true })}
+                          {article.createdAt
+                            ? formatDistanceToNow(new Date(article.createdAt), { addSuffix: true })
+                            : "Unknown date"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
