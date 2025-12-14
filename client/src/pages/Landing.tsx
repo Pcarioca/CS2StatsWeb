@@ -17,7 +17,7 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild data-testid="button-get-started">
-              <a href="/api/login">Get Started</a>
+              <Link href="/login">Get Started</Link>
             </Button>
             <Button size="lg" variant="outline" asChild data-testid="button-explore-matches">
               <Link href="/matches">Explore Matches</Link>
@@ -86,7 +86,7 @@ export default function Landing() {
             Sign in to favorite your teams, comment on matches, and personalize your experience.
           </p>
           <Button size="lg" asChild data-testid="button-signin-cta">
-            <a href="/api/login">Sign In Now</a>
+            <Link href="/login">Sign In Now</Link>
           </Button>
         </div>
       </section>

@@ -67,6 +67,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  passwordHash: text("password_hash"),
   role: userRoleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -74,6 +75,7 @@ export const users = pgTable("users", {
 
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
+  passwordHash: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -102,7 +104,16 @@ export const teams = pgTable("teams", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertTeamSchema = createInsertSchema(teams).omit({
+export const insertTeamSchema = createInsertSchema(teams, {
+  socialLinks: z
+    .object({
+      twitter: z.string().optional(),
+      twitch: z.string().optional(),
+      youtube: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -165,7 +176,19 @@ export const matches = pgTable("matches", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertMatchSchema = createInsertSchema(matches).omit({
+export const insertMatchSchema = createInsertSchema(matches, {
+  maps: z.array(z.string()).nullable().optional(),
+  streamLinks: z
+    .array(
+      z.object({
+        platform: z.string(),
+        url: z.string(),
+        latency: z.string().optional(),
+      }),
+    )
+    .nullable()
+    .optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -198,7 +221,17 @@ export const matchEvents = pgTable("match_events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertMatchEventSchema = createInsertSchema(matchEvents).omit({
+export const insertMatchEventSchema = createInsertSchema(matchEvents, {
+  metadata: z
+    .object({
+      weapon: z.string().optional(),
+      round: z.number().int().optional(),
+      side: z.string().optional(),
+      victim: z.string().optional(),
+    })
+    .nullable()
+    .optional(),
+}).omit({
   id: true,
   createdAt: true,
 });
@@ -251,7 +284,9 @@ export const newsArticles = pgTable("news_articles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertNewsArticleSchema = createInsertSchema(newsArticles).omit({
+export const insertNewsArticleSchema = createInsertSchema(newsArticles, {
+  tags: z.array(z.string()).nullable().optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,

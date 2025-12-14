@@ -20,6 +20,7 @@ import News from "@/pages/News";
 import Settings from "@/pages/Settings";
 import Profile from "@/pages/Profile";
 import Admin from "@/pages/Admin";
+import Login from "@/pages/Login";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -42,6 +43,7 @@ function Router() {
           )}
           
           {/* Public Routes */}
+          <Route path="/login" component={Login} />
           <Route path="/matches" component={Matches} />
           <Route path="/matches/:id" component={MatchDetail} />
           <Route path="/teams" component={Teams} />

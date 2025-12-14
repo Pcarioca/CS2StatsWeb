@@ -37,11 +37,17 @@ import {
   type UserSettings,
   type InsertUserSettings,
 } from "@shared/schema";
-import { db } from "./db";
+import { db as database, hasDatabase } from "./db";
 import { eq, and, or, desc, sql, inArray } from "drizzle-orm";
+import { MemoryStorage } from "./memoryStorage";
+
+// `db` is only used when DATABASE_URL is set. When it's not set we use MemoryStorage instead.
+// The non-null assertion keeps TypeScript happy without eagerly throwing at import-time.
+const db = database!;
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
 
   getTeams(limit?: number, offset?: number): Promise<Team[]>;
@@ -105,9 +111,13 @@ export class DbStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const existingUser = await this.getUser(userData.id);
-    
+    // `id` is optional on insert (DB default), but required for lookups/updates.
     const [user] = await db
       .insert(users)
       .values(userData)
@@ -118,6 +128,7 @@ export class DbStorage implements IStorage {
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
+          passwordHash: userData.passwordHash,
           updatedAt: new Date(),
         },
       })
@@ -333,11 +344,12 @@ export class DbStorage implements IStorage {
   }
 
   async getNewsArticles(published?: boolean, limit: number = 20, offset: number = 0): Promise<NewsArticle[]> {
-    const query = db.select().from(newsArticles);
+    const whereClause =
+      published === undefined ? undefined : eq(newsArticles.published, published);
 
-    if (published !== undefined) {
-      query.where(eq(newsArticles.published, published));
-    }
+    const query = whereClause
+      ? db.select().from(newsArticles).where(whereClause)
+      : db.select().from(newsArticles);
 
     return await query
       .orderBy(desc(newsArticles.createdAt))
@@ -370,23 +382,21 @@ export class DbStorage implements IStorage {
   }
 
   async getComments(matchId?: string, articleId?: string, parentCommentId?: string | null): Promise<Comment[]> {
-    let query = db.select().from(comments).where(eq(comments.removed, false));
+    const conditions: any[] = [eq(comments.removed, false)];
 
-    if (matchId) {
-      query = query.where(eq(comments.matchId, matchId));
-    }
-    if (articleId) {
-      query = query.where(eq(comments.articleId, articleId));
-    }
+    if (matchId) conditions.push(eq(comments.matchId, matchId));
+    if (articleId) conditions.push(eq(comments.articleId, articleId));
     if (parentCommentId !== undefined) {
-      if (parentCommentId === null) {
-        query = query.where(sql`${comments.parentCommentId} IS NULL`);
-      } else {
-        query = query.where(eq(comments.parentCommentId, parentCommentId));
-      }
+      conditions.push(
+        parentCommentId === null
+          ? sql`${comments.parentCommentId} IS NULL`
+          : eq(comments.parentCommentId, parentCommentId),
+      );
     }
 
-    return await query.orderBy(desc(comments.createdAt));
+    const whereClause = conditions.length === 1 ? conditions[0] : and(...conditions);
+
+    return await db.select().from(comments).where(whereClause).orderBy(desc(comments.createdAt));
   }
 
   async getComment(id: string): Promise<Comment | undefined> {
@@ -414,11 +424,12 @@ export class DbStorage implements IStorage {
   }
 
   async getCommentFlags(reviewed?: boolean): Promise<CommentFlag[]> {
-    const query = db.select().from(commentFlags);
+    const whereClause =
+      reviewed === undefined ? undefined : eq(commentFlags.reviewed, reviewed);
 
-    if (reviewed !== undefined) {
-      query.where(eq(commentFlags.reviewed, reviewed));
-    }
+    const query = whereClause
+      ? db.select().from(commentFlags).where(whereClause)
+      : db.select().from(commentFlags);
 
     return await query.orderBy(desc(commentFlags.createdAt));
   }
@@ -462,13 +473,16 @@ export class DbStorage implements IStorage {
   }
 
   async getNotifications(userId: string, unreadOnly?: boolean): Promise<Notification[]> {
-    const query = db.select().from(notifications).where(eq(notifications.userId, userId));
+    const conditions: any[] = [eq(notifications.userId, userId)];
+    if (unreadOnly) conditions.push(eq(notifications.read, false));
 
-    if (unreadOnly) {
-      query.where(eq(notifications.read, false));
-    }
+    const whereClause = conditions.length === 1 ? conditions[0] : and(...conditions);
 
-    return await query.orderBy(desc(notifications.createdAt));
+    return await db
+      .select()
+      .from(notifications)
+      .where(whereClause)
+      .orderBy(desc(notifications.createdAt));
   }
 
   async createNotification(notificationData: InsertNotification): Promise<Notification> {
@@ -514,4 +528,4 @@ export class DbStorage implements IStorage {
   }
 }
 
-export const storage = new DbStorage();
+export const storage: IStorage = hasDatabase ? new DbStorage() : new MemoryStorage();
