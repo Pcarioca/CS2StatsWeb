@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, Star, Calendar } from "lucide-react";
+import { Search, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import type { Match, Team } from "@shared/schema";
@@ -158,9 +158,6 @@ export default function Matches() {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" data-testid={`button-favorite-match-${match.id}`}>
-                        <Star className="h-4 w-4" />
-                      </Button>
                       <Button
                         variant={match.status === "live" ? "default" : "outline"}
                         asChild

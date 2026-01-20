@@ -7,10 +7,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Star, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { useFavorites } from "@/hooks/useFavorites";
 import type { Team } from "@shared/schema";
 
 export default function Teams() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { isFavoriteTeam, toggleTeamFavorite } = useFavorites();
 
   const { data: teams, isLoading } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
@@ -70,54 +72,63 @@ export default function Teams() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTeams.map((team) => (
-              <Card key={team.id} className="hover-elevate" data-testid={`team-card-${team.id}`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={team.logoUrl || undefined} alt={team.name} />
-                      <AvatarFallback className="text-xl">
-                        {team.acronym || team.name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <Button variant="ghost" size="icon" data-testid={`button-favorite-team-${team.id}`}>
-                      <Star className="h-4 w-4" />
+            {filteredTeams.map((team) => {
+              const favorite = isFavoriteTeam(team.id);
+              return (
+                <Card key={team.id} className="hover-elevate" data-testid={`team-card-${team.id}`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={team.logoUrl || undefined} alt={team.name} />
+                        <AvatarFallback className="text-xl">
+                          {team.acronym || team.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <Button
+                        variant={favorite ? "default" : "ghost"}
+                        size="icon"
+                        onClick={() => toggleTeamFavorite(team.id)}
+                        aria-pressed={favorite}
+                        data-testid={`button-favorite-team-${team.id}`}
+                      >
+                        <Star className={favorite ? "h-4 w-4 fill-current" : "h-4 w-4"} />
+                      </Button>
+                    </div>
+
+                    <h3 className="text-xl font-bold mb-1" data-testid={`team-name-${team.id}`}>
+                      {team.name}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                      {team.country && <span>{team.country}</span>}
+                      {team.region && <span>- {team.region}</span>}
+                      {team.rank && (
+                        <span className="flex items-center gap-1">
+                          - <TrendingUp className="h-3 w-3" /> #{team.rank}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-center mb-4">
+                      <div>
+                        <div className="text-2xl font-bold font-mono">{team.wins}</div>
+                        <div className="text-xs text-muted-foreground">Wins</div>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold font-mono">{team.losses}</div>
+                        <div className="text-xs text-muted-foreground">Losses</div>
+                      </div>
+                    </div>
+
+                    <Button variant="outline" className="w-full" asChild data-testid={`button-view-team-${team.id}`}>
+                      <Link href={`/teams/${team.id}`}>
+                        View Team
+                      </Link>
                     </Button>
-                  </div>
-
-                  <h3 className="text-xl font-bold mb-1" data-testid={`team-name-${team.id}`}>
-                    {team.name}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                    {team.country && <span>{team.country}</span>}
-                    {team.region && <span>• {team.region}</span>}
-                    {team.rank && (
-                      <span className="flex items-center gap-1">
-                        • <TrendingUp className="h-3 w-3" /> #{team.rank}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-center mb-4">
-                    <div>
-                      <div className="text-2xl font-bold font-mono">{team.wins}</div>
-                      <div className="text-xs text-muted-foreground">Wins</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold font-mono">{team.losses}</div>
-                      <div className="text-xs text-muted-foreground">Losses</div>
-                    </div>
-                  </div>
-
-                  <Button variant="outline" className="w-full" asChild data-testid={`button-view-team-${team.id}`}>
-                    <Link href={`/teams/${team.id}`}>
-                      View Team
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

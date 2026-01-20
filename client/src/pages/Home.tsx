@@ -28,9 +28,6 @@ function MatchCard({ match, team1, team2 }: { match: Match; team1?: Team; team2?
             {match.status === "finished" && <Badge variant="outline">FINISHED</Badge>}
             <span className="text-sm text-muted-foreground">{match.tournament}</span>
           </div>
-          <Button variant="ghost" size="icon" data-testid={`button-favorite-${match.id}`}>
-            <Star className="h-4 w-4" />
-          </Button>
         </div>
 
         <div className="grid grid-cols-3 gap-4 items-center mb-4">

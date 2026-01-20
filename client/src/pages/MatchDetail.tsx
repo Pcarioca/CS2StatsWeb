@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Trophy, ArrowLeft, Star, Share2, MessageSquare, Send } from "lucide-react";
+import { Trophy, ArrowLeft, Share2, MessageSquare, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -76,6 +76,26 @@ export default function MatchDetail() {
     postCommentMutation.mutate(commentContent);
   };
 
+  const handleShare = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link copied",
+          description: "Match link copied to clipboard.",
+        });
+      } else {
+        throw new Error("Clipboard unavailable");
+      }
+    } catch {
+      toast({
+        title: "Copy failed",
+        description: "Copy the URL from your browser address bar.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -132,13 +152,10 @@ export default function MatchDetail() {
               {isUpcoming && <Badge variant="secondary">UPCOMING</Badge>}
               {match.status === "finished" && <Badge variant="outline">FINISHED</Badge>}
               <span className="font-semibold text-lg">{match.tournament}</span>
-              {match.stage && <span className="text-muted-foreground">• {match.stage}</span>}
+              {match.stage && <span className="text-muted-foreground">- {match.stage}</span>}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" data-testid="button-favorite">
-                <Star className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" data-testid="button-share">
+              <Button variant="ghost" size="icon" onClick={handleShare} data-testid="button-share">
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>
@@ -320,7 +337,7 @@ export default function MatchDetail() {
                     Log in to join the discussion and share your thoughts about this match
                   </p>
                   <Button variant="outline" asChild data-testid="button-login-prompt">
-                    <Link href="/">
+                    <Link href="/login">
                       Log In to Comment
                     </Link>
                   </Button>

@@ -42,7 +42,8 @@ async function seed() {
           rank: 1,
           wins: 45,
           losses: 12,
-          logoUrl: "/uploads/teams/navi-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=NAVI",
+          bannerUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -55,7 +56,8 @@ async function seed() {
           rank: 2,
           wins: 42,
           losses: 15,
-          logoUrl: "/uploads/teams/faze-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=FAZE",
+          bannerUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -68,7 +70,8 @@ async function seed() {
           rank: 3,
           wins: 38,
           losses: 18,
-          logoUrl: "/uploads/teams/vitality-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=VITALITY",
+          bannerUrl: "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -81,7 +84,8 @@ async function seed() {
           rank: 4,
           wins: 35,
           losses: 20,
-          logoUrl: "/uploads/teams/g2-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=G2",
+          bannerUrl: "https://images.unsplash.com/photo-1486572788966-cfd3df1f5b42?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -94,7 +98,8 @@ async function seed() {
           rank: 5,
           wins: 32,
           losses: 22,
-          logoUrl: "/uploads/teams/liquid-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=LIQUID",
+          bannerUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -107,7 +112,8 @@ async function seed() {
           rank: 6,
           wins: 30,
           losses: 23,
-          logoUrl: "/uploads/teams/mouz-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=MOUZ",
+          bannerUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -120,7 +126,8 @@ async function seed() {
           rank: 7,
           wins: 28,
           losses: 24,
-          logoUrl: "/uploads/teams/furia-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=FURIA",
+          bannerUrl: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1600&q=80",
         },
       },
       {
@@ -133,7 +140,8 @@ async function seed() {
           rank: 8,
           wins: 27,
           losses: 25,
-          logoUrl: "/uploads/teams/cloud9-logo.png",
+          logoUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=CLOUD9",
+          bannerUrl: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80",
         },
       },
     ];
@@ -159,7 +167,7 @@ async function seed() {
           totalDeaths: 12000,
           totalAssists: 3500,
           averageRating: 132,
-          avatarUrl: "/uploads/players/s1mple.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=s1mple",
         },
       },
       {
@@ -175,7 +183,7 @@ async function seed() {
           totalDeaths: 9800,
           totalAssists: 2800,
           averageRating: 118,
-          avatarUrl: "/uploads/players/b1t.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=b1t",
         },
       },
       {
@@ -191,7 +199,7 @@ async function seed() {
           totalDeaths: 14000,
           totalAssists: 4000,
           averageRating: 110,
-          avatarUrl: "/uploads/players/karrigan.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=karrigan",
         },
       },
       {
@@ -207,7 +215,7 @@ async function seed() {
           totalDeaths: 15000,
           totalAssists: 3200,
           averageRating: 114,
-          avatarUrl: "/uploads/players/rain.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=rain",
         },
       },
       {
@@ -223,7 +231,7 @@ async function seed() {
           totalDeaths: 13000,
           totalAssists: 4200,
           averageRating: 138,
-          avatarUrl: "/uploads/players/zywoo.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=ZywOo",
         },
       },
       {
@@ -239,7 +247,7 @@ async function seed() {
           totalDeaths: 15500,
           totalAssists: 4200,
           averageRating: 108,
-          avatarUrl: "/uploads/players/apex.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=apEX",
         },
       },
       {
@@ -255,7 +263,7 @@ async function seed() {
           totalDeaths: 13000,
           totalAssists: 3500,
           averageRating: 128,
-          avatarUrl: "/uploads/players/niko.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=NiKo",
         },
       },
       {
@@ -271,7 +279,7 @@ async function seed() {
           totalDeaths: 6000,
           totalAssists: 1500,
           averageRating: 125,
-          avatarUrl: "/uploads/players/m0nesy.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=m0NESY",
         },
       },
       {
@@ -287,7 +295,7 @@ async function seed() {
           totalDeaths: 12000,
           totalAssists: 2900,
           averageRating: 116,
-          avatarUrl: "/uploads/players/yekindar.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=YEKINDAR",
         },
       },
       {
@@ -303,7 +311,7 @@ async function seed() {
           totalDeaths: 15000,
           totalAssists: 4500,
           averageRating: 112,
-          avatarUrl: "/uploads/players/naf.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=NAF",
         },
       },
       {
@@ -319,7 +327,7 @@ async function seed() {
           totalDeaths: 12000,
           totalAssists: 3100,
           averageRating: 120,
-          avatarUrl: "/uploads/players/frozen.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=frozen",
         },
       },
       {
@@ -335,7 +343,7 @@ async function seed() {
           totalDeaths: 9200,
           totalAssists: 2600,
           averageRating: 109,
-          avatarUrl: "/uploads/players/siuhy.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=siuhy",
         },
       },
       {
@@ -351,7 +359,7 @@ async function seed() {
           totalDeaths: 14000,
           totalAssists: 3300,
           averageRating: 121,
-          avatarUrl: "/uploads/players/kscerato.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=KSCERATO",
         },
       },
       {
@@ -367,7 +375,7 @@ async function seed() {
           totalDeaths: 13500,
           totalAssists: 3600,
           averageRating: 115,
-          avatarUrl: "/uploads/players/yuurih.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=yuurih",
         },
       },
       {
@@ -383,7 +391,7 @@ async function seed() {
           totalDeaths: 13000,
           totalAssists: 3400,
           averageRating: 119,
-          avatarUrl: "/uploads/players/ax1le.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Ax1Le",
         },
       },
       {
@@ -399,7 +407,7 @@ async function seed() {
           totalDeaths: 13800,
           totalAssists: 3700,
           averageRating: 113,
-          avatarUrl: "/uploads/players/hobbit.png",
+          avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=HObbit",
         },
       },
     ];
@@ -617,7 +625,7 @@ async function seed() {
         title: "NAVI edge FaZe in a tense map one",
         subtitle: "Early highlights from the grand final",
         content: "NAVI and FaZe traded rounds early on Mirage, but NAVI close the opener 13-10 with crisp mid control and strong late-round conversions.",
-        heroImageUrl: "/uploads/news/navi-faze.jpg",
+        heroImageUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=80",
         tags: ["BLAST", "NAVI", "FaZe"],
         published: true,
       },
@@ -626,7 +634,7 @@ async function seed() {
         title: "ZywOo hits peak form in playoffs",
         subtitle: "Vitality's star continues to dominate",
         content: "ZywOo posted a 1.45 rating across the group stage and opened the semi-final with a 27-bomb. Vitality look poised for a deep run.",
-        heroImageUrl: "/uploads/news/zywoo-form.jpg",
+        heroImageUrl: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80",
         tags: ["ESL", "Vitality", "Players"],
         published: true,
       },
@@ -635,7 +643,7 @@ async function seed() {
         title: "IEM Katowice 2025 preview",
         subtitle: "A quick look at the bracket and favorites",
         content: "Katowice is around the corner. NAVI, G2, and Vitality top the early predictions, with Liquid and MOUZ looking like strong dark horses.",
-        heroImageUrl: "/uploads/news/katowice-preview.jpg",
+        heroImageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80",
         tags: ["IEM", "Preview"],
         published: true,
       },

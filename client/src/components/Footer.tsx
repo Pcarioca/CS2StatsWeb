@@ -44,7 +44,7 @@ export function Footer() {
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/api" className="hover:text-foreground transition-colors hover-elevate px-1 rounded" data-testid="link-api">
+                <Link href="/api-docs" className="hover:text-foreground transition-colors hover-elevate px-1 rounded" data-testid="link-api">
                   API Documentation
                 </Link>
               </li>
@@ -93,10 +93,11 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© 2024 CS2Stats. All rights reserved.</p>
+          <p>(c) 2024 CS2Stats. All rights reserved.</p>
           <p className="mt-2">Last data sync: {new Date().toLocaleString()}</p>
         </div>
       </div>
     </footer>
   );
 }
+
