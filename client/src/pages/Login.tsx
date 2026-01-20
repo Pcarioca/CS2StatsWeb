@@ -73,20 +73,12 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
-          <CardDescription>Use email & password (local auth) or Replit auth if configured.</CardDescription>
+          <CardDescription>Use email & password or Google.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-6">
             <Button asChild variant="outline" className="w-full">
-              <a href="/api/login">Continue with Replit</a>
-            </Button>
-          </div>
-          <div className="mb-6 space-y-2">
-            <Button asChild variant="ghost" className="w-full">
               <a href="/api/auth/google">Continue with Google</a>
-            </Button>
-            <Button asChild variant="ghost" className="w-full">
-              <a href="/api/auth/github">Continue with GitHub</a>
             </Button>
           </div>
 

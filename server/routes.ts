@@ -724,7 +724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/flags", isAuthenticated, isModerator, async (req, res) => {
+  const handleGetFlags = async (req: any, res: any) => {
     try {
       const reviewed = req.query.reviewed === "true" ? true : req.query.reviewed === "false" ? false : undefined;
       const flags = await storage.getCommentFlags(reviewed);
@@ -733,7 +733,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching flags:", error);
       res.status(500).json({ message: "Failed to fetch flags" });
     }
-  });
+  };
+
+  app.get("/api/admin/flags", isAuthenticated, isModerator, handleGetFlags);
+  app.get("/api/admin/flagged-comments", isAuthenticated, isModerator, handleGetFlags);
 
   app.patch("/api/admin/flags/:id", isAuthenticated, isModerator, async (req, res) => {
     try {

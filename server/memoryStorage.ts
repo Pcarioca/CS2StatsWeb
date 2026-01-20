@@ -65,6 +65,26 @@ export class MemoryStorage implements IStorage {
   }
 
   private seed() {
+    const devUser = this.insertUser({
+      id: "dev-user",
+      email: "dev@example.com",
+      firstName: "Dev",
+      lastName: "User",
+      profileImageUrl: null,
+      passwordHash: null,
+      role: "admin",
+    });
+
+    const guestUser = this.insertUser({
+      id: "guest-user",
+      email: "guest@example.com",
+      firstName: "Jamie",
+      lastName: "Taylor",
+      profileImageUrl: null,
+      passwordHash: null,
+      role: "user",
+    });
+
     const teamNavi = this.insertTeam({
       name: "Natus Vincere",
       acronym: "NAVI",
@@ -98,6 +118,61 @@ export class MemoryStorage implements IStorage {
       logoUrl: "/uploads/teams/vitality-logo.png",
     });
 
+    const teamG2 = this.insertTeam({
+      name: "G2 Esports",
+      acronym: "G2",
+      country: "EUR",
+      region: "Europe",
+      rank: 4,
+      wins: 35,
+      losses: 20,
+      logoUrl: "/uploads/teams/g2-logo.png",
+    });
+
+    const teamLiquid = this.insertTeam({
+      name: "Team Liquid",
+      acronym: "TL",
+      country: "USA",
+      region: "North America",
+      rank: 5,
+      wins: 32,
+      losses: 22,
+      logoUrl: "/uploads/teams/liquid-logo.png",
+    });
+
+    const teamMouz = this.insertTeam({
+      name: "MOUZ",
+      acronym: "MOUZ",
+      country: "DEU",
+      region: "Europe",
+      rank: 6,
+      wins: 30,
+      losses: 23,
+      logoUrl: "/uploads/teams/mouz-logo.png",
+    });
+
+    const teamFuria = this.insertTeam({
+      name: "FURIA",
+      acronym: "FUR",
+      country: "BRA",
+      region: "South America",
+      rank: 7,
+      wins: 28,
+      losses: 24,
+      logoUrl: "/uploads/teams/furia-logo.png",
+    });
+
+    const teamCloud9 = this.insertTeam({
+      name: "Cloud9",
+      acronym: "C9",
+      country: "USA",
+      region: "North America",
+      rank: 8,
+      wins: 27,
+      losses: 25,
+      logoUrl: "/uploads/teams/cloud9-logo.png",
+    });
+
     const playerS1mple = this.insertPlayer({
       teamId: teamNavi.id,
       alias: "s1mple",
@@ -112,7 +187,21 @@ export class MemoryStorage implements IStorage {
       avatarUrl: "/uploads/players/s1mple.png",
     });
 
-    this.insertPlayer({
+    const playerBit = this.insertPlayer({
+      teamId: teamNavi.id,
+      alias: "b1t",
+      realName: "Valerii Vakhovskyi",
+      country: "UKR",
+      role: "Rifler",
+      totalMatches: 120,
+      totalKills: 12000,
+      totalDeaths: 9800,
+      totalAssists: 2800,
+      averageRating: 118,
+      avatarUrl: "/uploads/players/b1t.png",
+    });
+
+    const playerKarrigan = this.insertPlayer({
       teamId: teamFaze.id,
       alias: "karrigan",
       realName: "Finn Andersen",
@@ -124,6 +213,20 @@ export class MemoryStorage implements IStorage {
       totalAssists: 4000,
       averageRating: 110,
       avatarUrl: "/uploads/players/karrigan.png",
+    });
+
+    const playerRain = this.insertPlayer({
+      teamId: teamFaze.id,
+      alias: "rain",
+      realName: "Havard Nygaard",
+      country: "NOR",
+      role: "Entry Fragger",
+      totalMatches: 180,
+      totalKills: 17000,
+      totalDeaths: 15000,
+      totalAssists: 3200,
+      averageRating: 114,
+      avatarUrl: "/uploads/players/rain.png",
     });
 
     this.insertPlayer({
@@ -140,40 +243,433 @@ export class MemoryStorage implements IStorage {
       avatarUrl: "/uploads/players/zywoo.png",
     });
 
+    this.insertPlayer({
+      teamId: teamVitality.id,
+      alias: "apEX",
+      realName: "Dan Madesclaire",
+      country: "FRA",
+      role: "IGL",
+      totalMatches: 220,
+      totalKills: 16000,
+      totalDeaths: 15500,
+      totalAssists: 4200,
+      averageRating: 108,
+      avatarUrl: "/uploads/players/apex.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamG2.id,
+      alias: "NiKo",
+      realName: "Nikola Kovac",
+      country: "BIH",
+      role: "Rifler",
+      totalMatches: 190,
+      totalKills: 20000,
+      totalDeaths: 13000,
+      totalAssists: 3500,
+      averageRating: 128,
+      avatarUrl: "/uploads/players/niko.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamG2.id,
+      alias: "m0NESY",
+      realName: "Ilya Osipov",
+      country: "RUS",
+      role: "AWPer",
+      totalMatches: 90,
+      totalKills: 9000,
+      totalDeaths: 6000,
+      totalAssists: 1500,
+      averageRating: 125,
+      avatarUrl: "/uploads/players/m0nesy.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamLiquid.id,
+      alias: "YEKINDAR",
+      realName: "Mareks Gailins",
+      country: "LVA",
+      role: "Entry Fragger",
+      totalMatches: 130,
+      totalKills: 14000,
+      totalDeaths: 12000,
+      totalAssists: 2900,
+      averageRating: 116,
+      avatarUrl: "/uploads/players/yekindar.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamLiquid.id,
+      alias: "NAF",
+      realName: "Keith Markovic",
+      country: "CAN",
+      role: "Support",
+      totalMatches: 210,
+      totalKills: 17000,
+      totalDeaths: 15000,
+      totalAssists: 4500,
+      averageRating: 112,
+      avatarUrl: "/uploads/players/naf.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamMouz.id,
+      alias: "frozen",
+      realName: "David Cerny",
+      country: "SVK",
+      role: "Rifler",
+      totalMatches: 160,
+      totalKills: 15000,
+      totalDeaths: 12000,
+      totalAssists: 3100,
+      averageRating: 120,
+      avatarUrl: "/uploads/players/frozen.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamMouz.id,
+      alias: "siuhy",
+      realName: "Kamil Szkaradek",
+      country: "POL",
+      role: "IGL",
+      totalMatches: 110,
+      totalKills: 9800,
+      totalDeaths: 9200,
+      totalAssists: 2600,
+      averageRating: 109,
+      avatarUrl: "/uploads/players/siuhy.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamFuria.id,
+      alias: "KSCERATO",
+      realName: "Kaike Cerato",
+      country: "BRA",
+      role: "Rifler",
+      totalMatches: 170,
+      totalKills: 16500,
+      totalDeaths: 14000,
+      totalAssists: 3300,
+      averageRating: 121,
+      avatarUrl: "/uploads/players/kscerato.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamFuria.id,
+      alias: "yuurih",
+      realName: "Yuri Santos",
+      country: "BRA",
+      role: "Support",
+      totalMatches: 165,
+      totalKills: 15000,
+      totalDeaths: 13500,
+      totalAssists: 3600,
+      averageRating: 115,
+      avatarUrl: "/uploads/players/yuurih.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamCloud9.id,
+      alias: "Ax1Le",
+      realName: "Sergey Rykhtorov",
+      country: "RUS",
+      role: "Rifler",
+      totalMatches: 175,
+      totalKills: 15800,
+      totalDeaths: 13000,
+      totalAssists: 3400,
+      averageRating: 119,
+      avatarUrl: "/uploads/players/ax1le.png",
+    });
+
+    this.insertPlayer({
+      teamId: teamCloud9.id,
+      alias: "HObbit",
+      realName: "Abay Khasenov",
+      country: "KAZ",
+      role: "Support",
+      totalMatches: 190,
+      totalKills: 15200,
+      totalDeaths: 13800,
+      totalAssists: 3700,
+      averageRating: 113,
+      avatarUrl: "/uploads/players/hobbit.png",
+    });
+
+    const nowMs = Date.now();
+    const minutes = 60 * 1000;
+    const hours = 60 * minutes;
+    const days = 24 * hours;
+
     const liveMatch = this.insertMatch({
       team1Id: teamNavi.id,
       team2Id: teamFaze.id,
       status: "live",
-      tournament: "IEM Example",
-      stage: "Group Stage",
-      scheduledAt: new Date(Date.now() - 10 * 60 * 1000),
-      startedAt: new Date(Date.now() - 5 * 60 * 1000),
-      team1Score: 8,
-      team2Score: 6,
-      currentMap: "Mirage",
+      tournament: "BLAST Premier Spring Finals 2025",
+      stage: "Grand Final",
+      scheduledAt: new Date(nowMs - 50 * minutes),
+      startedAt: new Date(nowMs - 35 * minutes),
+      team1Score: 10,
+      team2Score: 8,
+      currentMap: "Inferno",
       maps: ["Mirage", "Inferno", "Nuke"],
       streamLinks: [
-        { platform: "Twitch", url: "https://twitch.tv/esl_csgo", latency: "Low" },
+        { platform: "Twitch", url: "https://twitch.tv/blastpremier", latency: "Low" },
       ],
+    });
+
+    const liveMatchTwo = this.insertMatch({
+      team1Id: teamVitality.id,
+      team2Id: teamG2.id,
+      status: "live",
+      tournament: "ESL Pro League Season 19",
+      stage: "Semi-Final",
+      scheduledAt: new Date(nowMs - 60 * minutes),
+      startedAt: new Date(nowMs - 40 * minutes),
+      team1Score: 7,
+      team2Score: 9,
+      currentMap: "Ancient",
+      maps: ["Anubis", "Ancient", "Nuke"],
+      streamLinks: [
+        { platform: "YouTube", url: "https://youtube.com/esl", latency: "Low" },
+      ],
+    });
+
+    this.insertMatch({
+      team1Id: teamNavi.id,
+      team2Id: teamLiquid.id,
+      status: "upcoming",
+      tournament: "IEM Katowice 2025",
+      stage: "Quarter-Final",
+      scheduledAt: new Date(nowMs + 4 * hours),
+      team1Score: 0,
+      team2Score: 0,
+      maps: ["TBD", "TBD", "TBD"],
+    });
+
+    this.insertMatch({
+      team1Id: teamFaze.id,
+      team2Id: teamCloud9.id,
+      status: "upcoming",
+      tournament: "PGL Major Copenhagen 2025",
+      stage: "Group Stage",
+      scheduledAt: new Date(nowMs + 2 * days),
+      team1Score: 0,
+      team2Score: 0,
+      maps: ["TBD", "TBD", "TBD"],
+    });
+
+    const finishedMatch = this.insertMatch({
+      team1Id: teamVitality.id,
+      team2Id: teamMouz.id,
+      status: "finished",
+      tournament: "BLAST Premier Spring Groups 2025",
+      stage: "Group A",
+      scheduledAt: new Date(nowMs - 20 * hours),
+      startedAt: new Date(nowMs - 19 * hours),
+      finishedAt: new Date(nowMs - 18 * hours),
+      team1Score: 16,
+      team2Score: 12,
+      currentMap: "Mirage",
+      maps: ["Mirage", "Overpass"],
+    });
+
+    this.insertMatch({
+      team1Id: teamG2.id,
+      team2Id: teamFuria.id,
+      status: "finished",
+      tournament: "ESL Pro League Season 19",
+      stage: "Group B",
+      scheduledAt: new Date(nowMs - 2 * days),
+      startedAt: new Date(nowMs - 2 * days + 2 * hours),
+      finishedAt: new Date(nowMs - 2 * days + 4 * hours),
+      team1Score: 19,
+      team2Score: 17,
+      currentMap: "Nuke",
+      maps: ["Nuke", "Vertigo", "Overpass"],
     });
 
     this.insertMatchEvent({
       matchId: liveMatch.id,
       eventType: "kill",
-      timestamp: new Date(Date.now() - 60 * 1000),
-      description: "s1mple got a crucial AWP pick",
+      timestamp: new Date(nowMs - 18 * minutes),
+      description: "s1mple opens the round with an AWP pick",
       playerId: playerS1mple.id,
-      metadata: { weapon: "AWP", round: 15, side: "T" },
+      metadata: { weapon: "AWP", round: 8, side: "CT" },
+    });
+
+    this.insertMatchEvent({
+      matchId: liveMatch.id,
+      eventType: "bomb_plant",
+      timestamp: new Date(nowMs - 15 * minutes),
+      description: "FaZe get the bomb down on B",
+      playerId: playerKarrigan.id,
+      metadata: { round: 9, side: "T" },
+    });
+
+    this.insertMatchEvent({
+      matchId: liveMatch.id,
+      eventType: "clutch",
+      timestamp: new Date(nowMs - 12 * minutes),
+      description: "rain wins a 1v2 to keep FaZe close",
+      playerId: playerRain.id,
+      metadata: { round: 10, side: "T" },
+    });
+
+    this.insertMatchEvent({
+      matchId: liveMatch.id,
+      eventType: "round_end",
+      timestamp: new Date(nowMs - 9 * minutes),
+      description: "NAVI take the round off a fast mid hit",
+      playerId: playerBit.id,
+      metadata: { round: 11, side: "CT" },
+    });
+
+    this.insertMatchPlayerStats({
+      matchId: liveMatch.id,
+      playerId: playerS1mple.id,
+      kills: 19,
+      deaths: 12,
+      assists: 5,
+      adr: 89,
+      headshotPercent: 42,
+      rating: 128,
+      openingKills: 3,
+    });
+
+    this.insertMatchPlayerStats({
+      matchId: liveMatch.id,
+      playerId: playerBit.id,
+      kills: 15,
+      deaths: 11,
+      assists: 4,
+      adr: 77,
+      headshotPercent: 48,
+      rating: 114,
+      openingKills: 2,
+    });
+
+    this.insertMatchPlayerStats({
+      matchId: liveMatch.id,
+      playerId: playerKarrigan.id,
+      kills: 12,
+      deaths: 14,
+      assists: 6,
+      adr: 65,
+      headshotPercent: 31,
+      rating: 98,
+      openingKills: 1,
+    });
+
+    this.insertMatchPlayerStats({
+      matchId: liveMatch.id,
+      playerId: playerRain.id,
+      kills: 17,
+      deaths: 13,
+      assists: 3,
+      adr: 82,
+      headshotPercent: 39,
+      rating: 121,
+      openingKills: 2,
     });
 
     this.insertNewsArticle({
-      title: "Welcome to CS2Stats",
-      subtitle: "Local dev mode is running without a database.",
-      content: "This is seeded demo content. Configure DATABASE_URL to use Postgres/Drizzle storage.",
-      heroImageUrl: "/uploads/news/navi-wins.jpg",
+      title: "NAVI edge FaZe in a tense map one",
+      subtitle: "Early highlights from the grand final",
+      content: "NAVI and FaZe traded rounds early on Mirage, but NAVI close the opener 13-10 with crisp mid control and strong late-round conversions.",
+      heroImageUrl: "/uploads/news/navi-faze.jpg",
+      tags: ["BLAST", "NAVI", "FaZe"],
       published: true,
-      authorId: null as any,
+      authorId: devUser.id,
     });
+
+    this.insertNewsArticle({
+      title: "ZywOo hits peak form in playoffs",
+      subtitle: "Vitality's star continues to dominate",
+      content: "ZywOo posted a 1.45 rating across the group stage and opened the semi-final with a 27-bomb. Vitality look poised for a deep run.",
+      heroImageUrl: "/uploads/news/zywoo-form.jpg",
+      tags: ["ESL", "Vitality", "Players"],
+      published: true,
+      authorId: devUser.id,
+    });
+
+    this.insertNewsArticle({
+      title: "IEM Katowice 2025 preview",
+      subtitle: "A quick look at the bracket and favorites",
+      content: "Katowice is around the corner. NAVI, G2, and Vitality top the early predictions, with Liquid and MOUZ looking like strong dark horses.",
+      heroImageUrl: "/uploads/news/katowice-preview.jpg",
+      tags: ["IEM", "Preview"],
+      published: true,
+      authorId: devUser.id,
+    });
+
+    this.insertComment({
+      userId: guestUser.id,
+      matchId: liveMatch.id,
+      content: "Great tempo from NAVI so far.",
+    });
+
+    this.insertComment({
+      userId: devUser.id,
+      matchId: liveMatch.id,
+      content: "FaZe needs a timeout to reset.",
+    });
+
+    const flaggedComment = this.insertComment({
+      userId: guestUser.id,
+      matchId: finishedMatch.id,
+      content: "Check out my stream for picks and tips.",
+    });
+
+    this.insertCommentFlag({
+      commentId: flaggedComment.id,
+      userId: devUser.id,
+      reason: "spam",
+      additionalInfo: "Repeated promo text in multiple threads.",
+    });
+
+    this.insertUserFavorite({
+      userId: devUser.id,
+      teamId: teamNavi.id,
+    });
+
+    this.insertUserFavorite({
+      userId: devUser.id,
+      playerId: playerS1mple.id,
+    });
+
+    this.insertNotification({
+      userId: devUser.id,
+      type: "match_start",
+      title: "Match is live",
+      message: "NAVI vs FaZe is now live.",
+      link: `/matches/${liveMatch.id}`,
+      read: false,
+    });
+
+    this.insertNotification({
+      userId: devUser.id,
+      type: "comment_reply",
+      title: "New reply",
+      message: "Someone replied to your match comment.",
+      link: `/matches/${liveMatchTwo.id}`,
+      read: false,
+    });
+
+    this.insertUserSettings({
+      userId: devUser.id,
+      theme: "dark",
+      emailNotifications: true,
+      pushNotifications: true,
+      matchStartAlerts: true,
+    });
+  }
+
+  private insertUser(user: Omit<User, "createdAt" | "updatedAt">): User {
+    const created = withTimestamps(user) as User;
+    this.users.set(created.id, created);
+    return created;
   }
 
   private insertTeam(team: InsertTeam): Team {
@@ -214,12 +710,73 @@ export class MemoryStorage implements IStorage {
     return created;
   }
 
+  private insertMatchPlayerStats(stats: InsertMatchPlayerStats): MatchPlayerStats {
+    const created = withTimestamps({ ...stats, id: uuid() }) as MatchPlayerStats;
+    this.matchPlayerStats.set(created.id, created);
+    return created;
+  }
+
   private insertNewsArticle(article: InsertNewsArticle): NewsArticle {
     const created = withTimestamps({
       ...article,
       id: uuid(),
     }) as NewsArticle;
     this.newsArticles.set(created.id, created);
+    return created;
+  }
+
+  private insertComment(comment: InsertComment): Comment {
+    const created = withTimestamps({
+      ...comment,
+      id: uuid(),
+      likes: 0,
+      flagged: false,
+      removed: false,
+      removalReason: null,
+      removedBy: null,
+    }) as Comment;
+    this.comments.set(created.id, created);
+    return created;
+  }
+
+  private insertCommentFlag(flag: InsertCommentFlag): CommentFlag {
+    const created = withTimestamps({
+      ...flag,
+      id: uuid(),
+      reviewed: false,
+    }) as CommentFlag;
+    this.commentFlags.set(created.id, created);
+
+    const comment = this.comments.get(flag.commentId);
+    if (comment) {
+      this.comments.set(flag.commentId, { ...comment, flagged: true, updatedAt: now() });
+    }
+
+    return created;
+  }
+
+  private insertUserFavorite(favorite: InsertUserFavorite): UserFavorite {
+    const created = withTimestamps({ ...favorite, id: uuid() }) as UserFavorite;
+    this.userFavorites.set(created.id, created);
+    return created;
+  }
+
+  private insertNotification(notification: InsertNotification): Notification {
+    const created = withTimestamps({ ...notification, id: uuid(), read: notification.read ?? false }) as Notification;
+    this.notifications.set(created.id, created);
+    return created;
+  }
+
+  private insertUserSettings(settings: InsertUserSettings): UserSettings {
+    const created = withTimestamps({
+      id: uuid(),
+      userId: settings.userId,
+      theme: settings.theme ?? "system",
+      emailNotifications: settings.emailNotifications ?? true,
+      pushNotifications: settings.pushNotifications ?? true,
+      matchStartAlerts: settings.matchStartAlerts ?? true,
+    }) as UserSettings;
+    this.userSettings.set(settings.userId, created);
     return created;
   }
 
@@ -363,9 +920,7 @@ export class MemoryStorage implements IStorage {
   }
 
   async createMatchPlayerStats(stats: InsertMatchPlayerStats): Promise<MatchPlayerStats> {
-    const created = withTimestamps({ ...stats, id: uuid() }) as MatchPlayerStats;
-    this.matchPlayerStats.set(created.id, created);
-    return created;
+    return this.insertMatchPlayerStats(stats);
   }
 
   async updateMatchPlayerStats(
@@ -421,14 +976,7 @@ export class MemoryStorage implements IStorage {
   }
 
   async createComment(comment: InsertComment): Promise<Comment> {
-    const created = withTimestamps({
-      ...comment,
-      id: uuid(),
-      removed: false,
-      flagged: false,
-    }) as Comment;
-    this.comments.set(created.id, created);
-    return created;
+    return this.insertComment(comment);
   }
 
   async updateComment(id: string, comment: Partial<InsertComment>): Promise<Comment | undefined> {
@@ -450,19 +998,7 @@ export class MemoryStorage implements IStorage {
   }
 
   async createCommentFlag(flag: InsertCommentFlag): Promise<CommentFlag> {
-    const created = withTimestamps({
-      ...flag,
-      id: uuid(),
-      reviewed: false,
-    }) as CommentFlag;
-    this.commentFlags.set(created.id, created);
-
-    const comment = this.comments.get(flag.commentId);
-    if (comment) {
-      this.comments.set(flag.commentId, { ...comment, flagged: true, updatedAt: now() });
-    }
-
-    return created;
+    return this.insertCommentFlag(flag);
   }
 
   async updateCommentFlag(id: string, reviewed: boolean): Promise<CommentFlag | undefined> {
@@ -480,9 +1016,7 @@ export class MemoryStorage implements IStorage {
   }
 
   async createUserFavorite(favorite: InsertUserFavorite): Promise<UserFavorite> {
-    const created = withTimestamps({ ...favorite, id: uuid() }) as UserFavorite;
-    this.userFavorites.set(created.id, created);
-    return created;
+    return this.insertUserFavorite(favorite);
   }
 
   async deleteUserFavorite(id: string): Promise<boolean> {
@@ -496,9 +1030,7 @@ export class MemoryStorage implements IStorage {
   }
 
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    const created = withTimestamps({ ...notification, id: uuid(), read: false }) as Notification;
-    this.notifications.set(created.id, created);
-    return created;
+    return this.insertNotification(notification);
   }
 
   async markNotificationAsRead(id: string): Promise<Notification | undefined> {

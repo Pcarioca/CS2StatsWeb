@@ -3,7 +3,6 @@ import { Strategy, type VerifyFunction } from "openid-client/passport";
 
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as GitHubStrategy } from "passport-github2";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
@@ -101,6 +100,39 @@ async function upsertUser(
   });
 }
 
+// Helper to build a user-like object compatible with existing flows
+async function buildPassportUser(
+  providerId: string,
+  email: string | undefined,
+  firstName?: string | null,
+  lastName?: string | null,
+  picture?: string | null,
+  accessToken?: string,
+  refreshToken?: string,
+) {
+  const dbUser = await storage.upsertUser({
+    id: providerId,
+    email: email ?? null,
+    firstName: firstName ?? null,
+    lastName: lastName ?? null,
+    profileImageUrl: picture ?? null,
+    role: "user",
+  } as any);
+
+  return {
+    claims: {
+      sub: dbUser.id,
+      email: dbUser.email,
+      first_name: dbUser.firstName,
+      last_name: dbUser.lastName,
+      profile_image_url: dbUser.profileImageUrl,
+    },
+    expires_at: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  };
+}
+
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
@@ -109,79 +141,62 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Register Google and GitHub strategies early so they are available in `local` mode as well.
-  // These will only be activated if the relevant env vars are provided.
-  const registerOAuthProviders = () => {
-    // Setup Google strategy if configured
-    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-      const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
-      passport.use(
-        new GoogleStrategy(
-          {
-            clientID: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: `${baseUrl}/api/auth/google/callback`,
-            scope: ["profile", "email"],
-          },
-          async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-            try {
-              const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
-              const names = (profile.name || {}) as any;
-              const firstName = names.givenName ?? names.familyName ?? undefined;
-              const lastName = names.familyName ?? undefined;
-              const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : undefined;
-              const id = `google:${profile.id}`;
-              const userObj = await buildPassportUser(id, email, firstName, lastName, picture, accessToken, refreshToken);
-              done(null, userObj as any);
-            } catch (err) {
-              done(err as any);
-            }
-          },
-        ),
-      );
-    }
+  passport.serializeUser((user: Express.User, cb) => cb(null, user));
+  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-    // Setup GitHub strategy if configured
-    if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
-      const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
-      passport.use(
-        new GitHubStrategy(
-          {
-            clientID: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            callbackURL: `${baseUrl}/api/auth/github/callback`,
-            scope: ["user:email"],
-          },
-          async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-            try {
-              const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
-              const displayName = profile.displayName || profile.username;
-              const nameParts = (displayName || "").split(" ");
-              const firstName = nameParts[0] ?? undefined;
-              const lastName = nameParts.slice(1).join(" ") || undefined;
-              const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : undefined;
-              const id = `github:${profile.id}`;
-              const userObj = await buildPassportUser(id, email, firstName, lastName, picture, accessToken, refreshToken);
-              done(null, userObj as any);
-            } catch (err) {
-              done(err as any);
-            }
-          },
-        ),
-      );
-    }
-  };
+  const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
 
-  // call early registration
-  registerOAuthProviders();
+  // Setup Google strategy if configured
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: `${baseUrl}/api/auth/google/callback`,
+          scope: ["profile", "email"],
+        },
+        async (accessToken: any, refreshToken: any, profile: any, done: any) => {
+          try {
+            const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
+            const names = (profile.name || {}) as any;
+            const firstName = names.givenName ?? names.familyName ?? undefined;
+            const lastName = names.familyName ?? undefined;
+            const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : undefined;
+            const id = `google:${profile.id}`;
+            const userObj = await buildPassportUser(id, email, firstName, lastName, picture, accessToken, refreshToken);
+            done(null, userObj as any);
+          } catch (err) {
+            done(err as any);
+          }
+        },
+      ),
+    );
+
+    app.get(
+      "/api/auth/google",
+      passport.authenticate("google", { scope: ["profile", "email"] }),
+    );
+
+    app.get(
+      "/api/auth/google/callback",
+      passport.authenticate("google", { failureRedirect: "/login" }),
+      (req, res) => {
+        const userId = (req.user as any)?.claims?.sub;
+        if (userId) {
+          (req.session as any).userId = userId;
+        }
+        res.redirect("/");
+      },
+    );
+  }
 
   // Development-only simulation routes to emulate OAuth provider callbacks
   if (process.env.NODE_ENV !== "production") {
-    app.get("/api/auth/simulate/:provider", async (req, res) => {
+    app.get("/api/auth/simulate/google", async (req, res) => {
       try {
-        const provider = req.params.provider || "google";
-        const id = `${provider}:sim-${Date.now()}`;
-        const email = `${provider}.test@example.com`;
+        const id = `google:sim-${Date.now()}`;
+        const email = "google.test@example.com";
         const firstName = "Sim";
         const lastName = "User";
         const picture = null;
@@ -195,6 +210,10 @@ export async function setupAuth(app: Express) {
           if (err) {
             console.error("Simulation login error:", err);
             return res.status(500).json({ message: "Failed to simulate login" });
+          }
+          const userId = (req.user as any)?.claims?.sub;
+          if (userId) {
+            (req.session as any).userId = userId;
           }
           res.redirect("/");
         });
@@ -331,121 +350,6 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  // Helper to build a user-like object compatible with existing flows
-  async function buildPassportUser(providerId: string, email: string | undefined, firstName?: string | null, lastName?: string | null, picture?: string | null, accessToken?: string, refreshToken?: string) {
-    const id = providerId;
-    // Upsert to DB
-    const dbUser = await storage.upsertUser({
-      id,
-      email: email ?? null,
-      firstName: firstName ?? null,
-      lastName: lastName ?? null,
-      profileImageUrl: picture ?? null,
-      role: "user",
-    } as any);
-
-    const userObj: any = {
-      claims: {
-        sub: dbUser.id,
-        email: dbUser.email,
-        first_name: dbUser.firstName,
-        last_name: dbUser.lastName,
-        profile_image_url: dbUser.profileImageUrl,
-      },
-      expires_at: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    };
-
-    return userObj;
-  }
-
-  // Setup Google strategy if configured
-  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
-    passport.use(
-      new GoogleStrategy(
-        {
-          clientID: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: `${baseUrl}/api/auth/google/callback`,
-          scope: ["profile", "email"],
-        },
-        async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-          try {
-            const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
-            const names = (profile.name || {}) as any;
-            const firstName = names.givenName ?? names.familyName ?? undefined;
-            const lastName = names.familyName ?? undefined;
-            const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : undefined;
-            const id = `google:${profile.id}`;
-            const userObj = await buildPassportUser(id, email, firstName, lastName, picture, accessToken, refreshToken);
-            done(null, userObj as any);
-          } catch (err) {
-            done(err as any);
-          }
-        },
-      ),
-    );
-
-    app.get(
-      "/api/auth/google",
-      passport.authenticate("google", { scope: ["profile", "email"] }),
-    );
-
-    app.get(
-      "/api/auth/google/callback",
-      passport.authenticate("google", { failureRedirect: "/login" }),
-      (req, res) => {
-        res.redirect("/");
-      },
-    );
-  }
-
-  // Setup GitHub strategy if configured
-  if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
-    const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
-    passport.use(
-      new GitHubStrategy(
-        {
-          clientID: process.env.GITHUB_CLIENT_ID,
-          clientSecret: process.env.GITHUB_CLIENT_SECRET,
-          callbackURL: `${baseUrl}/api/auth/github/callback`,
-          scope: ["user:email"],
-        },
-        async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-          try {
-            // GitHub may return multiple emails
-            const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
-            const displayName = profile.displayName || profile.username;
-            const nameParts = (displayName || "").split(" ");
-            const firstName = nameParts[0] ?? undefined;
-            const lastName = nameParts.slice(1).join(" ") || undefined;
-            const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : undefined;
-            const id = `github:${profile.id}`;
-            const userObj = await buildPassportUser(id, email, firstName, lastName, picture, accessToken, refreshToken);
-            done(null, userObj as any);
-          } catch (err) {
-            done(err as any);
-          }
-        },
-      ),
-    );
-
-    app.get(
-      "/api/auth/github",
-      passport.authenticate("github", { scope: ["user:email"] }),
-    );
-
-    app.get(
-      "/api/auth/github/callback",
-      passport.authenticate("github", { failureRedirect: "/login" }),
-      (req, res) => {
-        res.redirect("/");
-      },
-    );
-  }
-
   const registeredStrategies = new Set<string>();
 
   const ensureStrategy = (domain: string) => {
@@ -464,9 +368,6 @@ export async function setupAuth(app: Express) {
       registeredStrategies.add(strategyName);
     }
   };
-
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
     ensureStrategy(req.hostname);
