@@ -85,6 +85,29 @@ export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 // ============================================================================
+// PASSWORD RESET TOKENS
+// ============================================================================
+
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  tokenHash: text("token_hash").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+// ============================================================================
 // TEAMS
 // ============================================================================
 
@@ -403,6 +426,9 @@ export const userSettings = pgTable("user_settings", {
   emailNotifications: boolean("email_notifications").default(true).notNull(),
   pushNotifications: boolean("push_notifications").default(true).notNull(),
   matchStartAlerts: boolean("match_start_alerts").default(true).notNull(),
+  commentReplyAlerts: boolean("comment_reply_alerts").default(true).notNull(),
+  newsletter: boolean("newsletter").default(false).notNull(),
+  publicProfile: boolean("public_profile").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -493,6 +519,14 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   notifications: many(notifications),
   settings: one(userSettings),
   flaggedComments: many(commentFlags),
+  passwordResetTokens: many(passwordResetTokens),
+}));
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
 }));
 
 export const commentsRelations = relations(comments, ({ one, many }) => ({

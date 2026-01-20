@@ -66,6 +66,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/account/export", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const favorites = await storage.getUserFavorites(userId);
+      const notifications = await storage.getNotifications(userId, false);
+      const settings = await storage.getUserSettings(userId);
+
+      const { passwordHash: _ph, ...safeUser } = user as any;
+      res.json({
+        exportedAt: new Date().toISOString(),
+        user: safeUser,
+        favorites,
+        notifications,
+        settings,
+      });
+    } catch (error) {
+      console.error("Error exporting account data:", error);
+      res.status(500).json({ message: "Failed to export data" });
+    }
+  });
+
+  app.delete("/api/account", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const deleted = await storage.deleteUser(userId);
+      if (!deleted) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      try {
+        req.session?.destroy?.(() => undefined);
+      } catch {}
+
+      res.json({ message: "Account deleted" });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
+
   app.get("/api/teams", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;

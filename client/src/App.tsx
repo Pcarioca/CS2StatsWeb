@@ -31,6 +31,8 @@ import Contact from "@/pages/Contact";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import ApiDocs from "@/pages/ApiDocs";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -55,6 +57,8 @@ function Router() {
           
           {/* Public Routes */}
           <Route path="/login" component={Login} />
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/reset-password" component={ResetPassword} />
           <Route path="/matches" component={Matches} />
           <Route path="/matches/:id" component={MatchDetail} />
           <Route path="/teams" component={Teams} />

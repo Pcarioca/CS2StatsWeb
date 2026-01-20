@@ -10,8 +10,9 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import createMemoryStore from "memorystore";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { z } from "zod";
-import { sendRegistrationEmail } from "./email";
+import { sendPasswordResetEmail, sendRegistrationEmail } from "./email";
 
 export type AuthMode = "local" | "replit" | "dev";
 
@@ -110,13 +111,19 @@ async function buildPassportUser(
   accessToken?: string,
   refreshToken?: string,
 ) {
+  const normalizedEmail = email ? email.toLowerCase() : undefined;
+  const existingByEmail = normalizedEmail ? await storage.getUserByEmail(normalizedEmail) : undefined;
+  const resolvedId = existingByEmail?.id ?? providerId;
+  const existingPasswordHash = (existingByEmail as any)?.passwordHash ?? null;
+
   const dbUser = await storage.upsertUser({
-    id: providerId,
-    email: email ?? null,
-    firstName: firstName ?? null,
-    lastName: lastName ?? null,
-    profileImageUrl: picture ?? null,
-    role: "user",
+    id: resolvedId,
+    email: normalizedEmail ?? null,
+    firstName: firstName ?? existingByEmail?.firstName ?? null,
+    lastName: lastName ?? existingByEmail?.lastName ?? null,
+    profileImageUrl: picture ?? existingByEmail?.profileImageUrl ?? null,
+    role: existingByEmail?.role ?? "user",
+    passwordHash: existingPasswordHash,
   } as any);
 
   return {
@@ -256,6 +263,147 @@ export async function setupAuth(app: Express) {
 
     app.get("/api/logout", (req, res) => {
       req.session.destroy(() => res.redirect("/"));
+    });
+
+    app.post("/api/auth/forgot-password", async (req: any, res) => {
+      try {
+        const validated = z
+          .object({
+            email: z.string().email(),
+          })
+          .parse(req.body);
+
+        const email = validated.email.toLowerCase();
+        const user = await storage.getUserByEmail(email);
+
+        if (user?.id) {
+          const rawToken = crypto.randomBytes(32).toString("hex");
+          const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+          const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+          await storage.createPasswordResetToken({
+            userId: user.id,
+            tokenHash,
+            expiresAt,
+            usedAt: null,
+          } as any);
+
+          const baseUrl = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
+          const resetUrl = `${baseUrl}/reset-password?token=${rawToken}`;
+
+          await sendPasswordResetEmail(email, resetUrl);
+        }
+
+        res.json({
+          message: "If an account exists for that email, a reset link has been sent.",
+        });
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        }
+        console.error("Error requesting password reset:", error);
+        res.status(500).json({ message: "Failed to request password reset" });
+      }
+    });
+
+    app.post("/api/auth/reset-password", async (req: any, res) => {
+      try {
+        const validated = z
+          .object({
+            token: z.string().min(20),
+            password: z.string().min(8),
+          })
+          .parse(req.body);
+
+        const tokenHash = crypto.createHash("sha256").update(validated.token).digest("hex");
+        const token = await storage.getPasswordResetTokenByHash(tokenHash);
+
+        if (!token || token.usedAt) {
+          return res.status(400).json({ message: "Invalid or already used reset token" });
+        }
+
+        if (token.expiresAt && new Date(token.expiresAt).getTime() < Date.now()) {
+          return res.status(400).json({ message: "Reset token expired" });
+        }
+
+        const user = await storage.getUser(token.userId);
+        if (!user) {
+          return res.status(400).json({ message: "Invalid reset token" });
+        }
+
+        const passwordHash = await bcrypt.hash(validated.password, 12);
+        const updatedUser = await storage.upsertUser({
+          id: user.id,
+          email: user.email ?? null,
+          firstName: user.firstName ?? null,
+          lastName: user.lastName ?? null,
+          profileImageUrl: user.profileImageUrl ?? null,
+          role: user.role,
+          passwordHash,
+        } as any);
+
+        await storage.markPasswordResetTokenUsed(token.id);
+
+        setLocalUserSession(req, updatedUser);
+
+        const { passwordHash: _ph, ...safeUser } = updatedUser as any;
+        res.json(safeUser);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        }
+        console.error("Error resetting password:", error);
+        res.status(500).json({ message: "Failed to reset password" });
+      }
+    });
+
+    app.post("/api/auth/change-password", async (req: any, res) => {
+      try {
+        const userId = (req.session as any)?.userId as string | undefined;
+        if (!userId) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const validated = z
+          .object({
+            currentPassword: z.string().min(1),
+            newPassword: z.string().min(8),
+          })
+          .parse(req.body);
+
+        const user = await storage.getUser(userId);
+        const passwordHash = (user as any)?.passwordHash as string | null | undefined;
+        if (!user || !passwordHash) {
+          return res.status(400).json({ message: "Password login is not enabled for this account" });
+        }
+
+        const ok = await bcrypt.compare(validated.currentPassword, passwordHash);
+        if (!ok) {
+          return res.status(401).json({ message: "Invalid current password" });
+        }
+
+        const nextHash = await bcrypt.hash(validated.newPassword, 12);
+        const updatedUser = await storage.upsertUser({
+          id: user.id,
+          email: user.email ?? null,
+          firstName: user.firstName ?? null,
+          lastName: user.lastName ?? null,
+          profileImageUrl: user.profileImageUrl ?? null,
+          role: user.role,
+          passwordHash: nextHash,
+        } as any);
+
+        setLocalUserSession(req, updatedUser);
+
+        const { passwordHash: _ph, ...safeUser } = updatedUser as any;
+        res.json(safeUser);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        }
+        console.error("Error changing password:", error);
+        res.status(500).json({ message: "Failed to change password" });
+      }
     });
 
     app.post("/api/auth/register", async (req: any, res) => {

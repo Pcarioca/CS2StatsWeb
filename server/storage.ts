@@ -1,5 +1,6 @@
 import {
   users,
+  passwordResetTokens,
   teams,
   players,
   matches,
@@ -13,6 +14,8 @@ import {
   userSettings,
   type User,
   type UpsertUser,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
   type Team,
   type InsertTeam,
   type Player,
@@ -49,6 +52,11 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  deleteUser(id: string): Promise<boolean>;
+
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetTokenByHash(tokenHash: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(id: string): Promise<PasswordResetToken | undefined>;
 
   getTeams(limit?: number, offset?: number): Promise<Team[]>;
   getTeam(id: string): Promise<Team | undefined>;
@@ -134,6 +142,33 @@ export class DbStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [created] = await db.insert(passwordResetTokens).values(token).returning();
+    return created;
+  }
+
+  async getPasswordResetTokenByHash(tokenHash: string): Promise<PasswordResetToken | undefined> {
+    const [token] = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.tokenHash, tokenHash));
+    return token;
+  }
+
+  async markPasswordResetTokenUsed(id: string): Promise<PasswordResetToken | undefined> {
+    const [updated] = await db
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.id, id))
+      .returning();
+    return updated;
   }
 
   async getTeams(limit: number = 50, offset: number = 0): Promise<Team[]> {

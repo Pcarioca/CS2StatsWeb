@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ export default function Login() {
 
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [registerFirstName, setRegisterFirstName] = useState("");
   const [registerLastName, setRegisterLastName] = useState("");
 
@@ -53,6 +54,12 @@ export default function Login() {
   const onRegister = async () => {
     setLoading(true);
     try {
+      if (registerPassword.length < 8) {
+        throw new Error("Password must be at least 8 characters.");
+      }
+      if (registerPassword !== registerConfirmPassword) {
+        throw new Error("Passwords do not match.");
+      }
       await postJson("/api/auth/register", {
         email: registerEmail,
         password: registerPassword,
@@ -109,6 +116,12 @@ export default function Login() {
                   autoComplete="current-password"
                 />
               </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Forgot your password?</span>
+                <Link href="/forgot-password" className="text-primary hover:underline" data-testid="link-forgot-password">
+                  Reset it
+                </Link>
+              </div>
               <Button className="w-full" onClick={onLogin} disabled={loading}>
                 Sign in
               </Button>
@@ -152,6 +165,16 @@ export default function Login() {
                   type="password"
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="register-confirm">Confirm password</Label>
+                <Input
+                  id="register-confirm"
+                  type="password"
+                  value={registerConfirmPassword}
+                  onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                   autoComplete="new-password"
                 />
               </div>

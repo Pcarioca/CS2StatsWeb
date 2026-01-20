@@ -2,6 +2,8 @@ import crypto from "crypto";
 import type {
   User,
   UpsertUser,
+  PasswordResetToken,
+  InsertPasswordResetToken,
   Team,
   InsertTeam,
   Player,
@@ -48,6 +50,7 @@ type EntityMap<T extends { id: string }> = Map<string, T>;
 
 export class MemoryStorage implements IStorage {
   private users: EntityMap<User> = new Map();
+  private passwordResetTokens: EntityMap<PasswordResetToken> = new Map();
   private teams: EntityMap<Team> = new Map();
   private players: EntityMap<Player> = new Map();
   private matches: EntityMap<Match> = new Map();
@@ -783,6 +786,9 @@ export class MemoryStorage implements IStorage {
       emailNotifications: settings.emailNotifications ?? true,
       pushNotifications: settings.pushNotifications ?? true,
       matchStartAlerts: settings.matchStartAlerts ?? true,
+      commentReplyAlerts: settings.commentReplyAlerts ?? true,
+      newsletter: settings.newsletter ?? false,
+      publicProfile: settings.publicProfile ?? true,
     }) as UserSettings;
     this.userSettings.set(settings.userId, created);
     return created;
@@ -814,6 +820,49 @@ export class MemoryStorage implements IStorage {
     };
     this.users.set(next.id, next);
     return next;
+  }
+
+  async deleteUser(id: string): Promise<boolean> {
+    const existed = this.users.delete(id);
+    if (!existed) return false;
+
+    // Best-effort cleanup of related entities for a cleaner demo experience
+    for (const [favId, fav] of Array.from(this.userFavorites.entries())) {
+      if (fav.userId === id) this.userFavorites.delete(favId);
+    }
+    for (const [notifId, notif] of Array.from(this.notifications.entries())) {
+      if (notif.userId === id) this.notifications.delete(notifId);
+    }
+    for (const [commentId, comment] of Array.from(this.comments.entries())) {
+      if (comment.userId === id) this.comments.delete(commentId);
+    }
+    for (const [flagId, flag] of Array.from(this.commentFlags.entries())) {
+      if (flag.userId === id) this.commentFlags.delete(flagId);
+    }
+    for (const [tokenId, token] of Array.from(this.passwordResetTokens.entries())) {
+      if (token.userId === id) this.passwordResetTokens.delete(tokenId);
+    }
+    this.userSettings.delete(id);
+
+    return true;
+  }
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const created = withTimestamps({ ...token, id: uuid(), usedAt: null } as any) as PasswordResetToken;
+    this.passwordResetTokens.set(created.id, created);
+    return created;
+  }
+
+  async getPasswordResetTokenByHash(tokenHash: string): Promise<PasswordResetToken | undefined> {
+    return Array.from(this.passwordResetTokens.values()).find((token) => token.tokenHash === tokenHash);
+  }
+
+  async markPasswordResetTokenUsed(id: string): Promise<PasswordResetToken | undefined> {
+    const existing = this.passwordResetTokens.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, usedAt: now(), updatedAt: now() } as PasswordResetToken;
+    this.passwordResetTokens.set(id, updated);
+    return updated;
   }
 
   async getTeams(limit: number = 50, offset: number = 0): Promise<Team[]> {
@@ -1063,6 +1112,9 @@ export class MemoryStorage implements IStorage {
       emailNotifications: settings.emailNotifications ?? existing?.emailNotifications ?? true,
       pushNotifications: settings.pushNotifications ?? existing?.pushNotifications ?? true,
       matchStartAlerts: settings.matchStartAlerts ?? existing?.matchStartAlerts ?? true,
+      commentReplyAlerts: settings.commentReplyAlerts ?? existing?.commentReplyAlerts ?? true,
+      newsletter: settings.newsletter ?? existing?.newsletter ?? false,
+      publicProfile: settings.publicProfile ?? existing?.publicProfile ?? true,
       createdAt: existing?.createdAt ?? timestamp,
       updatedAt: timestamp,
     };
